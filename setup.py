@@ -13,7 +13,7 @@ def read_requirements():
 
 # Read the version in the __version__.py file
 def read_version():
-    version_file = os.path.join(os.path.dirname(__file__), 'encryption', '__version__.py')
+    version_file = os.path.join(os.path.dirname(__file__), 'bipbip', '__version__.py')
     with open(version_file) as f:
         exec(f.read()) 
     return locals()['__version__']

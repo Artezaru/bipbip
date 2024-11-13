@@ -1,0 +1,1 @@
+encryption @ git+https://github.com/Artezaru/encryption.git@master
