@@ -471,7 +471,7 @@ def create_account(account: str, password: bytearray, pin: bytearray, language: 
     
     # Creating empty encryptedtext
     data = bytearray("".encode('utf-8'))
-    _, _, encryptedtext = encryption.data_to_encryptedtext(data, password, pin=pin)
+    encryptedtext = encryption.data_to_encryptedtext(data, password, pin=pin)
     
     with open(os.path.join(accountpath, "encryptedtext.bin"), "wb") as file:
         file.write(encryptedtext)
@@ -539,12 +539,10 @@ def load_encryptedtext(account: str, password: bytearray, pin: bytearray) -> byt
             If any given argument is of the wrong type.
         ValueError
             If the account does not exist or is invalid, or if password and pin are empty.
-        ComputationError
-            If the decryption process fails.
+        encryption.WrongKeyError
+            If the password or the pin is incorrect.
+            If the encryptedtext has been modified.
     """
-    class ComputationError(Exception):
-        pass
-
     encryptedtextfilepath = get_encryptedtext_filepath(account)
     
     if not isinstance(password, bytearray):
@@ -559,13 +557,12 @@ def load_encryptedtext(account: str, password: bytearray, pin: bytearray) -> byt
     with open(encryptedtextfilepath, "rb") as file:
         encryptedtext = file.read()
 
-    is_error, error, data = encryption.encryptedtext_to_data(encryptedtext, password, pin=pin)
-    
-    if is_error:
-        # Ensure deleting critical data
+    try:
+        data = encryption.encryptedtext_to_data(encryptedtext, password, pin=pin)
+    except encryption.WrongKeyError:
         encryption.delete_bytearray(password)
         encryption.delete_bytearray(pin)
-        raise ComputationError(f"Error number {error} during decryption. See documentation.")
+        raise 
     
     return data
 
@@ -590,12 +587,7 @@ def dumps_encryptedtext(account: str, password: bytearray, pin: bytearray, data:
             If any given argument is of the wrong type.
         ValueError
             If the account does not exist or is invalid, or if password and pin are empty.
-        ComputationError
-            If the encryption process fails.
     """
-    class ComputationError(Exception):
-        pass
-
     encryptedtextfilepath = get_encryptedtext_filepath(account)
     
     if not isinstance(password, bytearray):
@@ -607,14 +599,11 @@ def dumps_encryptedtext(account: str, password: bytearray, pin: bytearray, data:
     if len(pin) == 0:
         raise ValueError("Parameter pin is empty")
     
-    is_error, error, encryptedtext = encryption.data_to_encryptedtext(data, password, pin=pin)
+    encryptedtext = encryption.data_to_encryptedtext(data, password, pin=pin)
     
-    if is_error:
-        # Ensure deleting critical data
-        encryption.delete_bytearray(password)
-        encryption.delete_bytearray(pin)
-        encryption.delete_bytearray(data)
-        raise ComputationError(f"Error number {error} during encryption. See documentation.")
+    encryption.delete_bytearray(password)
+    encryption.delete_bytearray(pin)
+    encryption.delete_bytearray(data)
     
     with open(encryptedtextfilepath, "wb") as file:
         file.write(encryptedtext)

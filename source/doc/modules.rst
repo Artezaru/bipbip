@@ -6,3 +6,5 @@ Modules
    :caption: Modules:
 
    ./filesmanager.rst
+
+   ./binder.rst

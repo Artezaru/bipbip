@@ -27,17 +27,12 @@ class TestAccountManagement(unittest.TestCase):
     
     def test_03_create_account(self):
         """ Test account creation. """
-        if not fm.exist_account(self.account_name):  # Ensure the account doesn't already exist
-            fm.create_account(self.account_name, self.password, self.pin)
-        
+        fm.create_account(self.account_name, self.password, self.pin)
         account_path = fm.get_account_path(self.account_name)
         self.assertTrue(os.path.isdir(account_path))  # Check if the folder was created.
     
     def test_04_get_account_path(self):
         """ Test the account path. """
-        if not fm.exist_account(self.account_name):  # Ensure the account doesn't already exist
-            fm.create_account(self.account_name, self.password, self.pin)
-        
         account_path = fm.get_account_path(self.account_name)
         expected_path = os.path.join(self.accounts_dir, self.account_name)
         self.assertEqual(account_path, expected_path)
@@ -49,23 +44,12 @@ class TestAccountManagement(unittest.TestCase):
         self.assertTrue(os.path.isfile(icon_path))  # Check if the icon file exists
 
     def test_06_get_existing_accounts(self):
-        """ Test fetching existing accounts. """
-        # Create an account to ensure the function returns a list of existing accounts
-        if not fm.exist_account(self.account_name):
-            fm.create_account(self.account_name, self.password, self.pin)
-        
+        """ Test fetching existing accounts. """       
         existing_accounts = fm.get_existing_accounts()
         self.assertIn(self.account_name, existing_accounts)
 
     def test_07_delete_account(self):
-        """ Test account deletion. """
-        # Create an account to test it
-        if not fm.exist_account(self.account_name):
-            fm.create_account(self.account_name, self.password, self.pin)
-        
-        account_path = fm.get_account_path(self.account_name)
-        self.assertTrue(os.path.isdir(account_path))  # Ensure the account exists
-
+        """ Test account deletion. """        
         fm.delete_account(self.account_name)
         self.assertFalse(os.path.isdir(account_path))  # Ensure the account was deleted
 
